@@ -4,7 +4,7 @@ import argparse
 import datetime
 import sys
 
-key = 'e4f2a94c501636c69782bf90269bd'
+key = 'key'
 q = 'Mumbai'
 num_of_days = 3
 
