@@ -37,27 +37,41 @@ class Day:
             self.date = date
             self.time = time
         
-        def parse_response(self, response):
-            daily_weather = response['data']['weather']
-            for daily in daily_weather:
-                if daily['date'] == self.date:
-                    hourly_weather = daily['hourly']
-                    for hourly in hourly_weather:
-                        if hourly['time'] == self.time:
-                            self.winddir16Point = hourly['winddir16Point']
-                            self.weatherDesc = hourly['weatherDesc'][0]['value']
-                            self.windspeedKmph = hourly['windspeedKmph']
-                            self.chanceofrain = hourly['chanceofrain']
-                            self.visibility = hourly['visibility']
-                            self.humidity = hourly['humidity']
-                            self.precipMM = hourly['precipMM']
-                            self.WindGustMiles = hourly['WindGustMiles']
-                            self.WindGustKmph = hourly['WindGustKmph']
-                            self.windspeedMiles = hourly['windspeedMiles']
-                            self.tempC = hourly['tempC']
-                            self.FeelsLikeC = hourly['FeelsLikeC']
+        def parse_response(self, response, current=None):
+            if not current:
+                daily_weather = response['data']['weather']
+                for daily in daily_weather:
+                    if daily['date'] == self.date:
+                        hourly_weather = daily['hourly']
+                        for hourly in hourly_weather:
+                            if hourly['time'] == self.time:
+                                self.winddir16Point = hourly['winddir16Point']
+                                self.weatherDesc = hourly['weatherDesc'][0]['value']
+                                self.windspeedKmph = hourly['windspeedKmph']
+                                self.chanceofrain = hourly['chanceofrain']
+                                self.visibility = hourly['visibility']
+                                self.humidity = hourly['humidity']
+                                self.precipMM = hourly['precipMM']
+                                self.WindGustMiles = hourly['WindGustMiles']
+                                self.WindGustKmph = hourly['WindGustKmph']
+                                self.windspeedMiles = hourly['windspeedMiles']
+                                self.tempC = hourly['tempC']
+                                self.FeelsLikeC = hourly['FeelsLikeC']
+            else:
+                hourly = response['data']['current_condition'][0]
+                self.winddir16Point = hourly['winddir16Point']
+                self.weatherDesc = hourly['weatherDesc'][0]['value']
+                self.windspeedKmph = hourly['windspeedKmph']
+                self.visibility = hourly['visibility']
+                self.humidity = hourly['humidity']
+                self.precipMM = hourly['precipMM']
+                self.windspeedMiles = hourly['windspeedMiles']
+                self.tempC = hourly['temp_C']
+                self.FeelsLikeC = hourly['FeelsLikeC']
 
-def display_day(day):
+
+def display_day(day, current):
+    display_hour(current)
     display_hour(day.morn)
     display_hour(day.aftn)
     display_hour(day.even)
@@ -74,9 +88,11 @@ def display_hour(hour):
 def format_op(day):
     pass
 
+current = Day.Time('0000', '0000')
+current.parse_response(response=response, current=True)
 for i in range(num_of_days):
     date_of_day = datetime.date.today() + datetime.timedelta(days=i)
     d_string = date_of_day.strftime('%Y-%m-%d')
     day = Day(d_string)
     day.parse_response(response)
-    display_day(day)
+    display_day(day, current)
