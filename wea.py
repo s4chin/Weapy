@@ -4,104 +4,6 @@ import argparse
 import datetime
 import sys
 
-key = 'key'
-q = 'Mumbai'
-num_of_days = 3
-
-url = 'http://api.worldweatheronline.com/free/v2/weather.ashx?q=%s&format=json&num_of_days=%d&key=%s' \
-      % (q, num_of_days, key)
-
-r = requests.get(url)
-response = r.json()
-
-def parse_place(response):
-    place = response['data']['request'][0]
-    name_of_place = place['query']
-    type_of_place = place['type']
-
-class Day:
-    def __init__(self, date):
-        self.date = date
-        self.morn = self.Time(time='830', date=date)
-        self.aftn = self.Time(time='1130', date=date)
-        self.even = self.Time(time='2030', date=date)
-        self.nigh = self.Time(time='2330', date=date)
-    
-    def parse_response(self, response):
-        self.morn.parse_response(response)
-        self.aftn.parse_response(response)
-        self.even.parse_response(response)
-        self.nigh.parse_response(response)
-            
-    class Time:
-        def __init__(self, date, time):
-            self.date = date
-            self.time = time
-        
-        def parse_response(self, response, current_hour=None):
-            if not current_hour:
-                daily_weather = response['data']['weather']
-                for daily in daily_weather:
-                    if daily['date'] == self.date:
-                        hourly_weather = daily['hourly']
-                        for hourly in hourly_weather:
-                            if hourly['time'] == self.time:
-                                self.weatherCode = hourly['weatherCode']
-                                self.winddir16Point = hourly['winddir16Point']
-                                self.weatherDesc = hourly['weatherDesc'][0]['value']
-                                self.windspeedKmph = hourly['windspeedKmph']
-                                self.chanceofrain = hourly['chanceofrain']
-                                self.visibility = hourly['visibility']
-                                self.humidity = hourly['humidity']
-                                self.precipMM = hourly['precipMM']
-                                self.WindGustMiles = hourly['WindGustMiles']
-                                self.WindGustKmph = hourly['WindGustKmph']
-                                self.windspeedMiles = hourly['windspeedMiles']
-                                self.tempC = hourly['tempC']
-                                self.FeelsLikeC = hourly['FeelsLikeC']
-            else:
-                hourly = response['data']['current_condition'][0]
-                self.weatherCode = hourly['weatherCode']
-                self.winddir16Point = hourly['winddir16Point']
-                self.weatherDesc = hourly['weatherDesc'][0]['value']
-                self.windspeedKmph = hourly['windspeedKmph']
-                self.visibility = hourly['visibility']
-                self.humidity = hourly['humidity']
-                self.precipMM = hourly['precipMM']
-                self.windspeedMiles = hourly['windspeedMiles']
-                self.tempC = hourly['temp_C']
-                self.FeelsLikeC = hourly['FeelsLikeC']
-
-
-def display_day(day, current_hour):
-    display_hour(current_hour)
-    display_hour(day.morn)
-    display_hour(day.aftn)
-    display_hour(day.even)
-    display_hour(day.nigh)
-
-def display_hour(hour):
-    print hour.date
-    print hour.time
-    print hour.weatherDesc
-    print hour.tempC
-    print hour.winddir16Point
-    print hour.humidity
-
-def format_op(hour):
-    pass
-
-current_hour = Day.Time('0000', '0000')
-current_hour.parse_response(response=response, current_hour=True)
-for i in range(num_of_days):
-    date_of_day = datetime.date.today() + datetime.timedelta(days=i)
-    d_string = date_of_day.strftime('%Y-%m-%d')
-    day = Day(d_string)
-    day.parse_response(response)
-    display_day(day, current_hour)
-
-##############################################################################
-
 iconUnknown = [
     "    .-.      ",
     "     __)     ",
@@ -268,6 +170,158 @@ weatherCodes = {
     '395': iconHeavySnowShowers, # ThunderyHeavySnow
     }
 
+windDir = {
+    "N":   "\033[1m↓\033[0m",
+    "NNE": "\033[1m↓\033[0m",
+    "NE":  "\033[1m↙\033[0m",
+    "ENE": "\033[1m↙\033[0m",
+    "E":   "\033[1m←\033[0m",
+    "ESE": "\033[1m←\033[0m",
+    "SE":  "\033[1m↖\033[0m",
+    "SSE": "\033[1m↖\033[0m",
+    "S":   "\033[1m↑\033[0m",
+    "SSW": "\033[1m↑\033[0m",
+    "SW":  "\033[1m↗\033[0m",
+    "WSW": "\033[1m↗\033[0m",
+    "W":   "\033[1m→\033[0m",
+    "WNW": "\033[1m→\033[0m",
+    "NW":  "\033[1m↘\033[0m",
+    "NNW": "\033[1m↘\033[0m",
+}
 
-for line in weatherCodes['143']:
-    print line
+key = 'key'
+q = 'Mumbai'
+num_of_days = 3
+
+url = 'http://api.worldweatheronline.com/free/v2/weather.ashx?q=%s&format=json&num_of_days=%d&key=%s' \
+      % (q, num_of_days, key)
+
+r = requests.get(url)
+response = r.json()
+
+def parse_place(response):
+    place = response['data']['request'][0]
+    name_of_place = place['query']
+    type_of_place = place['type']
+
+class Day:
+    def __init__(self, date):
+        self.date = date
+        self.morn = self.Time(time='830', date=date)
+        self.aftn = self.Time(time='1130', date=date)
+        self.even = self.Time(time='2030', date=date)
+        self.nigh = self.Time(time='2330', date=date)
+    
+    def parse_response(self, response):
+        self.morn.parse_response(response)
+        self.aftn.parse_response(response)
+        self.even.parse_response(response)
+        self.nigh.parse_response(response)
+            
+    class Time:
+        def __init__(self, date, time):
+            self.date = date
+            self.time = time
+        
+        def parse_response(self, response, current_hour=None):
+            if not current_hour:
+                daily_weather = response['data']['weather']
+                for daily in daily_weather:
+                    if daily['date'] == self.date:
+                        hourly_weather = daily['hourly']
+                        for hourly in hourly_weather:
+                            if hourly['time'] == self.time:
+                                self.weatherCode = hourly['weatherCode']
+                                self.winddir16Point = hourly['winddir16Point']
+                                self.weatherDesc = hourly['weatherDesc'][0]['value']
+                                self.windspeedKmph = hourly['windspeedKmph']
+                                self.chanceofrain = hourly['chanceofrain']
+                                self.visibility = hourly['visibility']
+                                self.humidity = hourly['humidity']
+                                self.precipMM = hourly['precipMM']
+                                self.WindGustMiles = hourly['WindGustMiles']
+                                self.WindGustKmph = hourly['WindGustKmph']
+                                self.windspeedMiles = hourly['windspeedMiles']
+                                self.tempC = hourly['tempC']
+                                self.FeelsLikeC = hourly['FeelsLikeC']
+            else:
+                hourly = response['data']['current_condition'][0]
+                self.weatherCode = hourly['weatherCode']
+                self.winddir16Point = hourly['winddir16Point']
+                self.weatherDesc = hourly['weatherDesc'][0]['value']
+                self.windspeedKmph = hourly['windspeedKmph']
+                self.visibility = hourly['visibility']
+                self.humidity = hourly['humidity']
+                self.precipMM = hourly['precipMM']
+                self.windspeedMiles = hourly['windspeedMiles']
+                self.tempC = hourly['temp_C']
+                self.FeelsLikeC = hourly['FeelsLikeC']
+
+def format_hour(hour, current=None):
+    icon = list(weatherCodes[hour.weatherCode])
+    icon[0] += (hour.weatherDesc).ljust(17)[:17]
+    if hour.FeelsLikeC > hour.tempC:
+        icon[1] += (color_temp(hour.tempC) + "-" + color_temp(hour.FeelsLikeC) + "C").ljust(17)
+    else:
+        icon[1] += (color_temp(hour.FeelsLikeC) + "-" + color_temp(hour.tempC) + "C").ljust(17)
+    icon[2] += windDir[hour.winddir16Point]
+    if not current:
+        if hour.WindGustKmph > hour.windspeedKmph:
+            icon[2] += (color_windspeed(hour.windspeedKmph) + "-" + color_windspeed(hour.WindGustKmph) + "km/h").ljust(16)
+        else:
+            icon[2] += (color_windspeed(hour.WindGustKmph) + "-" + color_windspeed(hour.windspeedKmph) + "km/h").ljust(16)
+    else:
+        icon[2] += (color_windspeed(hour.windspeedKmph) + "km/h").ljust(16)
+    icon[3] += (hour.visibility + "km").ljust(17)
+    icon[4] += (hour.precipMM + "mm")
+    if not current:
+        icon[4] +=  ("|" + hour.chanceofrain + "%").ljust(17)
+    else:
+        icon[4] = (icon[4]).ljust(17)
+    return icon
+
+
+def color_temp(temp):
+    return temp
+
+def color_windspeed(windspeed):
+    return windspeed
+
+def format_date(date):
+    date = datetime.datetime.strptime(date, '%Y-%m-%d')
+    date = date.strftime('%a %d. %b')
+    return " " + date + " "
+
+def display_current(current_hour):
+    icon = format_hour(current_hour, current='current')
+    for line in icon:
+        sys.stdout.write(line + '\n')
+
+def display_day(day):
+    icon_morn = format_hour(day.morn)
+    icon_aftn = format_hour(day.aftn)
+    icon_even = format_hour(day.even)
+    icon_nigh = format_hour(day.nigh)
+    icon = []
+    for i in range(5):
+        icon.append("|" + icon_morn[i] + "|"  + icon_aftn[i] + "|"  + icon_even[i] + "|"  + icon_nigh[i] + "|")
+    dateFmt = format_date(day.date)
+    ret = [ "                                                       ┌─────────────┐                                                       ",
+            "┌──────────────────────────────┬───────────────────────" + dateFmt + "───────────────────────┬──────────────────────────────┐",
+            "│           Morning            │             Noon      └──────┬──────┘    Evening            │            Night             │",
+            "├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤",
+            "└──────────────────────────────┴──────────────────────────────┴──────────────────────────────┴──────────────────────────────┘"]
+    ret = ret[:4] + icon + ret[4:]
+    for line in ret:
+        sys.stdout.write(line + '\n')
+
+
+current_hour = Day.Time('0000', '0000')
+current_hour.parse_response(response=response, current_hour=True)
+for i in range(num_of_days):
+    date_of_day = datetime.date.today() + datetime.timedelta(days=i)
+    d_string = date_of_day.strftime('%Y-%m-%d')
+    day = Day(d_string)
+    day.parse_response(response)
+    display_current(current_hour)
+    display_day(day)
