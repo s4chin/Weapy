@@ -1,0 +1,1 @@
+[![Code Health](https://landscape.io/github/s4chin/Weapy/master/landscape.svg?style=flat)](https://landscape.io/github/s4chin/Weapy/master)
