@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
+# encoding=utf8
 import requests
 import ConfigParser
 import argparse
 import datetime
 import sys
+
+reload(sys)  
+sys.setdefaultencoding('utf8') # As per http://stackoverflow.com/questions/21129020/how-to-fix-unicodedecodeerror-ascii-codec-cant-decode-byte
 
 iconUnknown = [
     "    .-.      ",
@@ -191,7 +196,7 @@ windDir = {
 
 key = 'key'
 q = 'Mumbai'
-num_of_days = 3
+num_of_days = 6
 
 url = 'http://api.worldweatheronline.com/free/v2/weather.ashx?q=%s&format=json&num_of_days=%d&key=%s' \
       % (q, num_of_days, key)
@@ -264,18 +269,18 @@ def format_hour(hour, current=None):
         icon[1] += (color_temp(hour.tempC) + "-" + color_temp(hour.FeelsLikeC) + "C").ljust(17)
     else:
         icon[1] += (color_temp(hour.FeelsLikeC) + "-" + color_temp(hour.tempC) + "C").ljust(17)
-    icon[2] += windDir[hour.winddir16Point]
+    icon[2] += windDir[hour.winddir16Point] + " "
     if not current:
         if hour.WindGustKmph > hour.windspeedKmph:
-            icon[2] += (color_windspeed(hour.windspeedKmph) + "-" + color_windspeed(hour.WindGustKmph) + "km/h").ljust(16)
+            icon[2] += (color_windspeed(hour.windspeedKmph) + "-" + color_windspeed(hour.WindGustKmph) + "km/h").ljust(15)
         else:
-            icon[2] += (color_windspeed(hour.WindGustKmph) + "-" + color_windspeed(hour.windspeedKmph) + "km/h").ljust(16)
+            icon[2] += (color_windspeed(hour.WindGustKmph) + "-" + color_windspeed(hour.windspeedKmph) + "km/h").ljust(15)
     else:
-        icon[2] += (color_windspeed(hour.windspeedKmph) + "km/h").ljust(16)
+        icon[2] += (color_windspeed(hour.windspeedKmph) + "km/h").ljust(15)
     icon[3] += (hour.visibility + "km").ljust(17)
     icon[4] += (hour.precipMM + "mm")
     if not current:
-        icon[4] +=  ("|" + hour.chanceofrain + "%").ljust(17)
+        icon[4] +=  ("|" + hour.chanceofrain + "%").ljust(12)
     else:
         icon[4] = (icon[4]).ljust(17)
     return icon
@@ -290,7 +295,7 @@ def color_windspeed(windspeed):
 def format_date(date):
     date = datetime.datetime.strptime(date, '%Y-%m-%d')
     date = date.strftime('%a %d. %b')
-    return " " + date + " "
+    return "┤ " + date + " ├"
 
 def display_current(current_hour):
     icon = format_hour(current_hour, current='current')
@@ -318,10 +323,10 @@ def display_day(day):
 
 current_hour = Day.Time('0000', '0000')
 current_hour.parse_response(response=response, current_hour=True)
+display_current(current_hour)
 for i in range(num_of_days):
     date_of_day = datetime.date.today() + datetime.timedelta(days=i)
     d_string = date_of_day.strftime('%Y-%m-%d')
     day = Day(d_string)
     day.parse_response(response)
-    display_current(current_hour)
     display_day(day)
