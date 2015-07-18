@@ -278,10 +278,10 @@ def format_hour(hour, current=None):
     else:
         icon[2] += (color_windspeed(hour.windspeedKmph) + "km/h").ljust(15)
     icon[3] += (hour.visibility + "km").ljust(17)
-    icon[4] += (hour.precipMM + "mm")
     if not current:
-        icon[4] +=  ("|" + hour.chanceofrain + "%").ljust(12)
+        icon[4] +=  (hour.precipMM + "mm" + "|" + hour.chanceofrain + "%").ljust(17)
     else:
+        icon[4] += hour.precipMM + "mm"
         icon[4] = (icon[4]).ljust(17)
     return icon
 
