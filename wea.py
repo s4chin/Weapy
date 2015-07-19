@@ -8,6 +8,7 @@ import sys
 
 reload(sys)  
 sys.setdefaultencoding('utf8') # As per http://stackoverflow.com/questions/21129020/how-to-fix-unicodedecodeerror-ascii-codec-cant-decode-byte
+sys.version = '2.7.3 (default, Apr 12 2012, 14:30:37) [MSC v.1500 32 bit (Intel)]' # As per http://stackoverflow.com/questions/19105255/praw-failed-to-parse-cpython-sys-version-when-creating-reddit-object
 
 iconUnknown = [
     "    .-.      ",
@@ -195,27 +196,24 @@ windDir = {
 }
 
 key = 'key'
-q = 'Mumbai'
-num_of_days = 6
 
-url = 'http://api.worldweatheronline.com/free/v2/weather.ashx?q=%s&format=json&num_of_days=%d&key=%s' \
-      % (q, num_of_days, key)
+url = ''
 
-r = requests.get(url)
-response = r.json()
+response = ''
 
 def parse_place(response):
     place = response['data']['request'][0]
     name_of_place = place['query']
     type_of_place = place['type']
+    sys.stdout.write(name_of_place + " " + type_of_place + "\n\n")
 
 class Day:
     def __init__(self, date):
         self.date = date
         self.morn = self.Time(time='830', date=date)
         self.aftn = self.Time(time='1130', date=date)
-        self.even = self.Time(time='2030', date=date)
-        self.nigh = self.Time(time='2330', date=date)
+        self.even = self.Time(time='1730', date=date)
+        self.nigh = self.Time(time='2030', date=date)
     
     def parse_response(self, response):
         self.morn.parse_response(response)
@@ -235,8 +233,10 @@ class Day:
                     if daily['date'] == self.date:
                         hourly_weather = daily['hourly']
                         for hourly in hourly_weather:
-                            if hourly['time'] == self.time:
+                            if int(hourly['time'])-int(self.time) <= 170 and int(hourly['time'])-int(self.time) > -130:
+                                #print int(hourly['time']), int(self.time)
                                 self.weatherCode = hourly['weatherCode']
+                                #print self.weatherCode
                                 self.winddir16Point = hourly['winddir16Point']
                                 self.weatherDesc = hourly['weatherDesc'][0]['value']
                                 self.windspeedKmph = hourly['windspeedKmph']
@@ -320,13 +320,27 @@ def display_day(day):
     for line in ret:
         sys.stdout.write(line + '\n')
 
+def main():
+    parse_place(response)
+    current_hour = Day.Time('0000', '0000')
+    current_hour.parse_response(response=response, current_hour=True)
+    display_current(current_hour)
+    for i in range(num_of_days):
+        date_of_day = datetime.date.today() + datetime.timedelta(days=i)
+        d_string = date_of_day.strftime('%Y-%m-%d')
+        day = Day(d_string)
+        day.parse_response(response)
+        display_day(day)
 
-current_hour = Day.Time('0000', '0000')
-current_hour.parse_response(response=response, current_hour=True)
-display_current(current_hour)
-for i in range(num_of_days):
-    date_of_day = datetime.date.today() + datetime.timedelta(days=i)
-    d_string = date_of_day.strftime('%Y-%m-%d')
-    day = Day(d_string)
-    day.parse_response(response)
-    display_day(day)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('q', nargs='?', default='Mumbai')
+    parser.add_argument('num_of_days', nargs='?', type=int, default=3)
+    args = parser.parse_args()
+    q = str(args.q)
+    num_of_days = int(args.num_of_days)
+    url = 'http://api.worldweatheronline.com/free/v2/weather.ashx?q=%s&format=json&num_of_days=%d&key=%s' \
+      % (q, num_of_days, key)
+    r = requests.get(url)
+    response = r.json()
+    main()
