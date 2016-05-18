@@ -6,7 +6,7 @@ import argparse
 import datetime
 import sys
 
-reload(sys)  
+reload(sys)
 sys.setdefaultencoding('utf8') # As per http://stackoverflow.com/questions/21129020/how-to-fix-unicodedecodeerror-ascii-codec-cant-decode-byte
 sys.version = '2.7.3 (default, Apr 12 2012, 14:30:37) [MSC v.1500 32 bit (Intel)]' # As per http://stackoverflow.com/questions/19105255/praw-failed-to-parse-cpython-sys-version-when-creating-reddit-object
 
@@ -214,18 +214,18 @@ class Day:
         self.aftn = self.Time(time='1130', date=date)
         self.even = self.Time(time='1730', date=date)
         self.nigh = self.Time(time='2030', date=date)
-    
+
     def parse_response(self, response):
         self.morn.parse_response(response)
         self.aftn.parse_response(response)
         self.even.parse_response(response)
         self.nigh.parse_response(response)
-            
+
     class Time:
         def __init__(self, date, time):
             self.date = date
             self.time = time
-        
+
         def parse_response(self, response, current_hour=None):
             if not current_hour:
                 daily_weather = response['data']['weather']
